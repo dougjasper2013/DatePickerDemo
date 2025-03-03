@@ -10,50 +10,80 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectedDate: Date = Date() // Holds the selected date
     @State private var selectedSeason: String = "Spring" // Default season selection
+    @State private var age: Double = 25 // Default age selection
+    @State private var isYellowBackground: Bool = false // Controls background color
 
     let seasons = ["Spring", "Summer", "Fall", "Winter"] // List of seasons
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Select a Date & Season")
-                .font(.headline)
+        ZStack {
+            // Background color changes based on toggle state
+            (isYellowBackground ? Color.yellow : Color.white)
+                .ignoresSafeArea()
 
-            // DatePicker to select a date
-            DatePicker("Pick a date", selection: $selectedDate, displayedComponents: .date)
-                .datePickerStyle(.compact)
+            VStack(spacing: 20) {
+                Text("Select Your Info")
+                    .font(.headline)
+
+                // DatePicker to select a date
+                DatePicker("Pick a date", selection: $selectedDate, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .padding()
+                    .labelsHidden()
+
+                // Season Picker
+                Picker("Favorite Season", selection: $selectedSeason) {
+                    ForEach(seasons, id: \.self) { season in
+                        Text(season)
+                    }
+                }
+                .pickerStyle(.wheel)
                 .padding()
-                .labelsHidden()
 
-            // Season Picker
-            Picker("Favorite Season", selection: $selectedSeason) {
-                ForEach(seasons, id: \.self) { season in
-                    Text(season)
-                }
-            }
-            .pickerStyle(.wheel)
-            .padding()
-
-            // Display selected date and season
-            VStack(spacing: 10) {
-                Label {
-                    Text("\(selectedDate, formatter: dateFormatter)")
+                // Age Slider
+                VStack {
+                    Text("Select Age: \(Int(age))")
                         .font(.title2)
                         .bold()
-                } icon: {
-                    Image(systemName: "calendar")
+                    Slider(value: $age, in: 0...100, step: 1)
+                        .padding()
                 }
 
-                Label {
-                    Text("Favorite Season: \(selectedSeason)")
-                        .font(.title2)
-                        .bold()
-                } icon: {
-                    Image(systemName: "leaf")
+                // Toggle for background color
+                Toggle("Yellow Background", isOn: $isYellowBackground)
+                    .padding()
+                    .font(.title2)
+
+                // Display selected date, season, and age
+                VStack(spacing: 10) {
+                    Label {
+                        Text("\(selectedDate, formatter: dateFormatter)")
+                            .font(.title2)
+                            .bold()
+                    } icon: {
+                        Image(systemName: "calendar")
+                    }
+
+                    Label {
+                        Text("Favorite Season: \(selectedSeason)")
+                            .font(.title2)
+                            .bold()
+                    } icon: {
+                        Image(systemName: "leaf")
+                    }
+
+                    Label {
+                        Text("Age: \(Int(age)) years")
+                            .font(.title2)
+                            .bold()
+                    } icon: {
+                        Image(systemName: "person.fill")
+                    }
                 }
+                .padding()
             }
             .padding()
         }
-        .padding()
     }
 
     // Date Formatter
@@ -67,5 +97,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
-

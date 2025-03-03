@@ -14,6 +14,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		807D4DDD2D75F1FB0089FB83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		80B452F92D6F64E800D74BF1 /* DatePickerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DatePickerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80B452FC2D6F64E800D74BF1 /* DatePickerDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerDemoApp.swift; sourceTree = "<group>"; };
 		80B452FE2D6F64E800D74BF1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,6 +52,7 @@
 		80B452FB2D6F64E800D74BF1 /* DatePickerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				807D4DDD2D75F1FB0089FB83 /* Info.plist */,
 				80B452FC2D6F64E800D74BF1 /* DatePickerDemoApp.swift */,
 				80B452FE2D6F64E800D74BF1 /* ContentView.swift */,
 				80B453002D6F64E900D74BF1 /* Assets.xcassets */,
@@ -272,8 +274,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"DatePickerDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = QUH29RTG32;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DatePickerDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -300,8 +304,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"DatePickerDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = QUH29RTG32;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DatePickerDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

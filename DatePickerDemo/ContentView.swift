@@ -39,6 +39,11 @@ struct ContentView: View {
     @State private var selectedOption = 0
     @State private var dependentOrderSummary = ""
     
+    // MARK: - Long Press Gesture States
+    @State private var longPressActive = false
+    @State private var longPressDetected = false
+    @State private var longPressMessage = ""
+    
     // Date Formatter
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -218,6 +223,42 @@ struct ContentView: View {
                                 .foregroundColor(.green)
                                 .padding(.top, 5)
                         }
+                    }
+                    
+                    // MARK: - Long Press Gesture Card
+                    CardView(title: "Long Press Gesture") {
+                        Text(longPressMessage.isEmpty ? "Long press the box below" : longPressMessage)
+                            .font(.headline)
+                            .foregroundColor(.purple)
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, 10)
+                        
+                        Rectangle()
+                            .fill(longPressActive ? Color.orange : Color.gray.opacity(0.5))
+                            .frame(height: 100)
+                            .cornerRadius(12)
+                            .overlay(
+                                Text("Hold me")
+                                    .foregroundColor(.white)
+                                    .bold()
+                            )
+                            .onLongPressGesture(minimumDuration: 1.0, pressing: { pressing in
+                                if pressing {
+                                    if !longPressDetected {
+                                        longPressActive = true
+                                        longPressMessage = "Pressing..."
+                                    }
+                                } else {
+                                    // User released finger
+                                    longPressActive = false
+                                    longPressDetected = false
+                                    longPressMessage = ""
+                                }
+                            }, perform: {
+                                // Long press threshold reached
+                                longPressDetected = true
+                                longPressMessage = "Long press detected!"
+                            })
                     }
                     
                     Spacer()

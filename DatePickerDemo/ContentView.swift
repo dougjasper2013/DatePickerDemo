@@ -9,23 +9,25 @@ import SwiftUI
 import UserNotifications
 
 struct ContentView: View {
-    // --- DatePicker state ---
+    // MARK: - Existing States
     @State private var selectedDate = Date()
-    
-    // --- Season Picker state ---
     @State private var selectedSeason = "Spring"
     private let seasons = ["Spring", "Summer", "Autumn", "Winter"]
-    
-    // --- Slider state ---
     @State private var age: Double = 25
-    
-    // --- Background color toggle ---
     @State private var isYellowBackground = false
-    
-    // --- Alert for confirmation ---
     @State private var showingAlert = false
     
-    // Date formatter
+    // MARK: - Pizza Picker States
+    private let crusts = ["Thin", "Thick", "Stuffed"]
+    private let sauces = ["Tomato", "Pesto", "BBQ"]
+    private let toppings = ["Veggie", "Meatlovers", "Hawaiian", "Canadian"]
+    
+    @State private var selectedCrust = 0
+    @State private var selectedSauce = 0
+    @State private var selectedTopping = 0
+    @State private var pizzaOrderSummary = ""
+    
+    // MARK: - Date Formatter
     private var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
@@ -101,6 +103,64 @@ struct ContentView: View {
                             .font(.headline)
                             .foregroundColor(.purple)
                     }
+                    
+                    // --- Pizza Order Card ---
+                    CardView(title: "Pizza Order") {
+                        Text("Choose your pizza:")
+                            .font(.headline)
+                        
+                        HStack(spacing: 0) {
+                            // Crust
+                            Picker("Crust", selection: $selectedCrust) {
+                                ForEach(0..<crusts.count, id: \.self) { index in
+                                    Text(crusts[index]).tag(index)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(maxWidth: .infinity, maxHeight: 120)
+                            .clipped()
+                            
+                            // Sauce
+                            Picker("Sauce", selection: $selectedSauce) {
+                                ForEach(0..<sauces.count, id: \.self) { index in
+                                    Text(sauces[index]).tag(index)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(maxWidth: .infinity, maxHeight: 120)
+                            .clipped()
+                            
+                            // Topping
+                            Picker("Topping", selection: $selectedTopping) {
+                                ForEach(0..<toppings.count, id: \.self) { index in
+                                    Text(toppings[index]).tag(index)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(maxWidth: .infinity, maxHeight: 120)
+                            .clipped()
+                        }
+                        .frame(height: 120)
+                        
+                        Button(action: placePizzaOrder) {
+                            Text("Place Pizza Order")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.red)
+                                .cornerRadius(12)
+                        }
+                        .padding(.top, 10)
+                        
+                        if !pizzaOrderSummary.isEmpty {
+                            Text(pizzaOrderSummary)
+                                .font(.headline)
+                                .foregroundColor(.orange)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 5)
+                        }
+                    }
                 }
                 .padding()
             }
@@ -108,7 +168,7 @@ struct ContentView: View {
             .background(isYellowBackground ? Color.yellow.opacity(0.3) : Color(.systemGroupedBackground))
             .animation(.easeInOut(duration: 0.3), value: isYellowBackground)
             .alert("Notification Scheduled", isPresented: $showingAlert) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text("A notification has been scheduled for \(formattedDate).")
             }
@@ -118,16 +178,19 @@ struct ContentView: View {
         }
     }
     
+    // MARK: - Pizza Order Function
+    private func placePizzaOrder() {
+        let crust = crusts[selectedCrust]
+        let sauce = sauces[selectedSauce]
+        let topping = toppings[selectedTopping]
+        
+        pizzaOrderSummary = "You ordered a \(crust) crust pizza with \(sauce) sauce and \(topping) toppings."
+    }
+    
     // MARK: - Notification Permission
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error {
-                print("Error requesting permission: \(error.localizedDescription)")
-            } else if granted {
-                print("Notification permission granted.")
-            } else {
-                print("Notification permission denied.")
-            }
+            if let error = error { print("Error requesting permission: \(error.localizedDescription)") }
         }
     }
     
@@ -147,7 +210,6 @@ struct ContentView: View {
             if let error = error {
                 print("Error scheduling notification: \(error.localizedDescription)")
             } else {
-                print("Notification scheduled for \(formattedDate)")
                 showingAlert = true
             }
         }

@@ -9,7 +9,7 @@ import SwiftUI
 import UserNotifications
 
 struct ContentView: View {
-    // MARK: - Existing States
+    // MARK: - General States
     @State private var selectedDate = Date()
     @State private var selectedSeason = "Spring"
     private let seasons = ["Spring", "Summer", "Autumn", "Winter"]
@@ -17,7 +17,7 @@ struct ContentView: View {
     @State private var isYellowBackground = false
     @State private var showingAlert = false
     
-    // MARK: - Pizza Picker States
+    // MARK: - Pizza Order States (simple multi-component)
     private let crusts = ["Thin", "Thick", "Stuffed"]
     private let sauces = ["Tomato", "Pesto", "BBQ"]
     private let toppings = ["Veggie", "Meatlovers", "Hawaiian", "Canadian"]
@@ -27,7 +27,19 @@ struct ContentView: View {
     @State private var selectedTopping = 0
     @State private var pizzaOrderSummary = ""
     
-    // MARK: - Date Formatter
+    // MARK: - Dependent Picker States
+    private let pizzaCategories = ["Vegetarian", "Meat", "Specialty"]
+    private let pizzaOptionsDict: [String: [String]] = [
+        "Vegetarian": ["Margherita", "Veggie Delight", "Spinach & Feta"],
+        "Meat": ["Meat Lovers", "Pepperoni", "BBQ Chicken"],
+        "Specialty": ["Hawaiian", "Canadian", "Four Seasons"]
+    ]
+    
+    @State private var selectedCategory = 0
+    @State private var selectedOption = 0
+    @State private var dependentOrderSummary = ""
+    
+    // Date Formatter
     private var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
@@ -40,7 +52,7 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 25) {
                     
-                    // --- Background Toggle Card ---
+                    // MARK: - Background Toggle Card
                     CardView(title: "Background Color") {
                         Toggle(isOn: $isYellowBackground) {
                             Text("Yellow Background")
@@ -53,7 +65,7 @@ struct ContentView: View {
                             .font(.subheadline)
                     }
                     
-                    // --- Date Picker Card ---
+                    // MARK: - DatePicker Card
                     CardView(title: "Select a Date") {
                         DatePicker("Pick a date:", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
                             .datePickerStyle(.graphical)
@@ -76,7 +88,7 @@ struct ContentView: View {
                         .padding(.top, 10)
                     }
                     
-                    // --- Season Picker Card ---
+                    // MARK: - Season Picker Card
                     CardView(title: "Favorite Season") {
                         Picker("Favorite Season", selection: $selectedSeason) {
                             ForEach(seasons, id: \.self) { season in
@@ -93,7 +105,7 @@ struct ContentView: View {
                             .foregroundColor(.green)
                     }
                     
-                    // --- Age Slider Card ---
+                    // MARK: - Age Slider Card
                     CardView(title: "Select Your Age") {
                         Slider(value: $age, in: 1...100, step: 1)
                             .tint(.purple)
@@ -104,13 +116,12 @@ struct ContentView: View {
                             .foregroundColor(.purple)
                     }
                     
-                    // --- Pizza Order Card ---
+                    // MARK: - Pizza Order Card (Simple Multi-Component Picker)
                     CardView(title: "Pizza Order") {
                         Text("Choose your pizza:")
                             .font(.headline)
                         
                         HStack(spacing: 0) {
-                            // Crust
                             Picker("Crust", selection: $selectedCrust) {
                                 ForEach(0..<crusts.count, id: \.self) { index in
                                     Text(crusts[index]).tag(index)
@@ -120,7 +131,6 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, maxHeight: 120)
                             .clipped()
                             
-                            // Sauce
                             Picker("Sauce", selection: $selectedSauce) {
                                 ForEach(0..<sauces.count, id: \.self) { index in
                                     Text(sauces[index]).tag(index)
@@ -130,7 +140,6 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, maxHeight: 120)
                             .clipped()
                             
-                            // Topping
                             Picker("Topping", selection: $selectedTopping) {
                                 ForEach(0..<toppings.count, id: \.self) { index in
                                     Text(toppings[index]).tag(index)
@@ -161,6 +170,57 @@ struct ContentView: View {
                                 .padding(.top, 5)
                         }
                     }
+                    
+                    // MARK: - Dependent Pizza Picker Card
+                    CardView(title: "Dependent Pizza Picker") {
+                        Text("Select a category and pizza option")
+                            .font(.headline)
+                        
+                        HStack(spacing: 0) {
+                            Picker("Category", selection: $selectedCategory) {
+                                ForEach(0..<pizzaCategories.count, id: \.self) { index in
+                                    Text(pizzaCategories[index]).tag(index)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(maxWidth: .infinity, maxHeight: 120)
+                            .clipped()
+                            .onChange(of: selectedCategory) { _ in
+                                selectedOption = 0 // reset dependent picker
+                            }
+                            
+                            Picker("Option", selection: $selectedOption) {
+                                ForEach(0..<(pizzaOptionsDict[pizzaCategories[selectedCategory]]?.count ?? 0), id: \.self) { index in
+                                    Text(pizzaOptionsDict[pizzaCategories[selectedCategory]]![index])
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(maxWidth: .infinity, maxHeight: 120)
+                            .clipped()
+                        }
+                        .frame(height: 120)
+                        
+                        Button(action: placeDependentOrder) {
+                            Text("Place Dependent Order")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.green)
+                                .cornerRadius(12)
+                        }
+                        .padding(.top, 10)
+                        
+                        if !dependentOrderSummary.isEmpty {
+                            Text(dependentOrderSummary)
+                                .font(.headline)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.green)
+                                .padding(.top, 5)
+                        }
+                    }
+                    
+                    Spacer()
                 }
                 .padding()
             }
@@ -178,23 +238,26 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Pizza Order Function
+    // MARK: - Functions
     private func placePizzaOrder() {
         let crust = crusts[selectedCrust]
         let sauce = sauces[selectedSauce]
         let topping = toppings[selectedTopping]
-        
         pizzaOrderSummary = "You ordered a \(crust) crust pizza with \(sauce) sauce and \(topping) toppings."
     }
     
-    // MARK: - Notification Permission
+    private func placeDependentOrder() {
+        let category = pizzaCategories[selectedCategory]
+        let option = pizzaOptionsDict[category]![selectedOption]
+        dependentOrderSummary = "You selected a \(option) pizza from the \(category) category."
+    }
+    
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error { print("Error requesting permission: \(error.localizedDescription)") }
+            if let error = error { print("Permission error: \(error.localizedDescription)") }
         }
     }
     
-    // MARK: - Schedule Notification
     private func scheduleNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Reminder"
@@ -205,13 +268,8 @@ struct ContentView: View {
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
         
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        
         UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error.localizedDescription)")
-            } else {
-                showingAlert = true
-            }
+            if error == nil { showingAlert = true }
         }
     }
 }
@@ -232,7 +290,6 @@ struct CardView<Content: View>: View {
                 .font(.title3)
                 .bold()
                 .padding(.bottom, 5)
-            
             content
         }
         .padding()
